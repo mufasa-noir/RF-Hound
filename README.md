@@ -79,4 +79,4 @@ RF Hound is open source and community contributions are welcome - hardware desig
 
 ## License
 
-Licensed under the GNU General Public License v3.0 (GPL-3.0) — see `LICENSE` for full text.
+Licensed under the GNU General Public License v3.0 (GPL-3.0) - see `LICENSE` for full text.
