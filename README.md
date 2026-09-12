@@ -1,7 +1,5 @@
 # RF Hound
 
-> An open-source, affordable handheld for working with wireless signals.
-
 **Status:** Early development - v1 scope is WiFi + Bluetooth. See [Roadmap](#roadmap) for what's coming next.
 
 ---
