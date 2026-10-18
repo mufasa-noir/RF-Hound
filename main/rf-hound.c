@@ -9,15 +9,15 @@ static const char *TAG = "rf-hound";
 void app_main(void)
 {
  ESP_LOGI(TAG, "Starting rf-hound ...");
- ESP_CHECK_ERROR(esp_event_loop_create_default());
- ESP_CHECK_ERROR(esp_netif_init());
+ ESP_ERROR_CHECK(esp_event_loop_create_default());
+ ESP_ERROR_CHECK(esp_netif_init());
 
 esp_err_t ret = nvs_init();
 if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    ESP_CHECK_ERROR(nvs_flash_erase());
+    ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_init();
 }
-ESP_CHECK_ERROR(ret);
+ESP_ERROR_CHECK(ret);
 
 main_menu(); 
 
