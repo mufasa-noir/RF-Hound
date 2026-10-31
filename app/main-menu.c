@@ -3,7 +3,9 @@
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "esp_err.h"
+#include "esp_event.h"
 #include "esp_http_server.h"
+#include "feature.h"
 
 #define WIFI_AP_SSID CONFIG_ESP_WIFI_SSID
 #define WIFI_AP_PASS CONFIG_ESP_WIFI_PASSWORD
@@ -12,8 +14,37 @@
 
 static const char *TAG = "main-menu";
 
-static esp_err_t dashboard_handler(httpd_req_t *req){
+static esp_err_t option_handler(httpd_req_t *req){
+    char buf[64];
+    int len = httpd_req_recv(req, buf, sizeof(buf) - 1);
+    if (len <= 0) return ESP_FAIL;
+    buf[len] = '\0';
 
+    const char *mode = strstr(buf, "\"wifi\"") ? "wifi"
+                     : strstr(buf, "\"ble\"")  ? "ble"
+                     : NULL;
+    if (!mode) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "unknown option");
+        return ESP_OK;
+    }
+    ESP_LOGI(TAG, "Selected mode: %s", mode);
+    ESP_ERROR_CHECK(esp_event_post(MAIN_MENU_EVENT, MAIN_MENU_OPTION_SELECTED, (void *)mode, strlen(mode) + 1, portMAX_DELAY));
+
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, "{\"ok\":true}", HTTPD_RESP_USE_STRLEN);
+}
+
+static httpd_uri_t option = {
+    .uri = "/option",
+    .method = HTTP_POST,
+    .handler = option_handler,
+    .user_ctx = NULL,
+};
+
+static esp_err_t dashboard_handler(httpd_req_t *req){
+    httpd_resp_set_status(req, "200 OK");
+    httpd_resp_set_type(req, "gzip/encoded");
+    httpd_resp_send(req, );
 }
 static httpd_uri_t root = {
     .uri = "/",
@@ -28,13 +59,16 @@ void main_menu(void){
 
     menu_ap();
     menu_server();
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(MAIN_MENU_EVENT, ESP_EVENT_ANY_ID, &feature_find, NULL, NULL));
 }
 void menu_server(void){
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     httpd_handle_t server = NULL;
-
+    
     if (httpd_start(&server, &config) == ESP_OK){
         ESP_ERROR_CHECK(httpd_register_uri_handler(server, &root));
+        ESP_ERROR_CHECK(httpd_register_uri_handler(server, &option_handler));
     }
     ESP_LOGI(TAG, "Dashboard is running ...");
 }
@@ -60,6 +94,4 @@ void menu_ap(void){
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_LOGI(TAG, "Wifi AP is up for dashboard access.");
-
-    esp_wifi_80211_tx()
 }
