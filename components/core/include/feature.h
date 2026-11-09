@@ -8,17 +8,18 @@ extern "C" {
 #endif
 
 typedef struct feature {
-    const char *id;                          
-    const char *name;                     
-    esp_err_t (*start)(void);
-    void      (*stop)(void);
-    void      (*on_button)(button_event_t ev);
+    const char *name;
+    const feature_category_t *category;
+    esp_err_t (*start)(void *ctx);
+    void      (*stop)(void *ctx);
+    void      (*on_button)(button_event_t ev, void *ctx);  
+    void       *ctx;
 } feature_t;
 
 typedef struct feature_category {
-    const char *id;          // "wifi", "ble"
-    const char *name;        // "Wi-Fi", "Bluetooth"
-    void (*category_handler)(void);
+    const char *name;
+    esp_err_t (*enter)(void);  
+    void      (*exit)(void);    
 } feature_category_t;
 
 extern const feature_category_t *const g_categories[];
