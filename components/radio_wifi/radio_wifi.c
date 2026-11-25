@@ -3,6 +3,7 @@
 #include "esp_wifi.h"
 #include "esp_netif.h"
 #include "radio_wifi.h"
+#include "routes.h"
 
 #define WIFI_AP_SSID CONFIG_ESP_WIFI_SSID
 #define WIFI_AP_PASS CONFIG_ESP_WIFI_PASSWORD
@@ -46,11 +47,11 @@ esp_err_t radio_wifi_deinit(void){
     return ESP_OK;
 }
 
-esp_err_t wifi_start(void){
+esp_err_t wifi_start(void *arg){
     if (!wifi_initialized) {
        ESP_ERROR_CHECK(radio_wifi_init());
     }
-    route_wifi_register(NULL);
+    register_handler((httpd_handle_t)arg, routes, sizeof(routes) / sizeof(routes[0]), "wifi");
     return ESP_OK;
 }
 
