@@ -3,4 +3,4 @@ CMakeLists.txt
 sdk
 .dist
 .vscode
-*.html
+Build_notes.md
